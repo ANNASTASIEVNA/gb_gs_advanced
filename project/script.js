@@ -8,23 +8,21 @@ const goods = [
 const GET_GOODS_ITEMS = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/catalogData.json'
 const GET_BASKET_GOODS_ITEMS = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/getBasket.json'
 
-function service(url, callback) {
-  xhr = new XMLHttpRequest();
-  xhr.open('GET', url);
-  xhr.send();
-  xhr.onload = () => {
-    callback(JSON.parse(xhr.response))
-  }
-}
+    function service(url) {
+      return fetch(url)
+      .then((response) => response.json())
+    }
+
     class GoodsItem {
-      constructor({ title, price }) {
-        this.title = title;
+      constructor({ product_name = "не найдено", price = "укажите цену"}= {}) {
+        this.product_name = product_name;
         this.price = price;
       }
+      
       render() {
         return `
         <div class="goods-item">
-          <h3>${this.title}</h3>
+          <h3>${this.product_name}</h3>
           <p>${this.price}</p>
         </div>
       `;
@@ -32,21 +30,35 @@ function service(url, callback) {
     }
     class GoodsList {
       items = [];
+      filteredItems = []
+
       fetchGoods(callback) {
         service(GET_GOODS_ITEMS, (data)=>{
           this.items = data;
+          this.filteredItems = data
           callback()
       });
     }
-    
+
+    filterItems(value) {
+      return new Promise ((res) =>
+      resolve(
+        this.filteredItems = this.list.filter (({product_name}) =>{
+          return product_name.match(new RegExp ( value, 'gui'))
+        })
+      )
+      )
+      .then(this.render)
+    }
+
       totalPrice() {
         return this.items.reduce((prev, { price }) => {
           return prev + price;
         }, 0)
       }
     
-      render() {
-        const goods = this.items.map(item => {
+      render(filterItems) {
+        const goods = this.filterItems.map(item => {
           const goodItem = new GoodsItem(item);
           return goodItem.render()
         }).join('');
@@ -56,24 +68,26 @@ function service(url, callback) {
     }
     
     const goodsList = new GoodsList();
-    goodsList.fetchGoods();
-    goodsList.render();
+    goodsList.fetchGoods()
+    
 
 
 
     class bascetList {
-      iteams = [];
+      items = [];
       fetchGoods(callback = ()=>{}) {
           service (GET_BASKET_GOODS_ITEMS, (data)=>{
                   this.items = data;
-                  callback()
+                  callback();
               });
              }
         }
-        const GoodsList = new GoodsList();
-        goodsList.fetchGoods(() => {
-        goodsList.render();
-      });
    
         const bascetList= new bascetList();
         bascetList.fetchGoods();
+
+        document.getElementsByClassName('search-button')[0].addEventListener('click', () => {
+        const value = document.getElementsByClassName('goods-search')[0].value;
+        goodsList.filterItems(value);
+        goodsList.render();
+        })
