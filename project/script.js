@@ -4,16 +4,25 @@ const goods = [
     { title: 'Jacket', price: 350 },
     { title: 'Shoes', price: 250 },
   ];
-  
+
+const GET_GOODS_ITEMS = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/catalogData.json'
+const GET_BASKET_GOODS_ITEMS = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/getBasket.json'
+
+    function service(url) {
+      return fetch(url)
+      .then((response) => response.json())
+    }
+
     class GoodsItem {
-      constructor({ title, price }) {
-        this.title = title;
+      constructor({ product_name = "не найдено", price = "укажите цену"}= {}) {
+        this.product_name = product_name;
         this.price = price;
       }
+      
       render() {
         return `
         <div class="goods-item">
-          <h3>${this.title}</h3>
+          <h3>${this.product_name}</h3>
           <p>${this.price}</p>
         </div>
       `;
@@ -21,18 +30,35 @@ const goods = [
     }
     class GoodsList {
       items = [];
-      fetchGoods() {
-        this.items = goods;
-      }
-    
+      filteredItems = []
+
+      fetchGoods(callback) {
+        service(GET_GOODS_ITEMS, (data)=>{
+          this.items = data;
+          this.filteredItems = data
+          callback()
+      });
+    }
+
+    filterItems(value) {
+      return new Promise ((res) =>
+      resolve(
+        this.filteredItems = this.list.filter (({product_name}) =>{
+          return product_name.match(new RegExp ( value, 'gui'))
+        })
+      )
+      )
+      .then(this.render)
+    }
+
       totalPrice() {
         return this.items.reduce((prev, { price }) => {
           return prev + price;
         }, 0)
       }
     
-      render() {
-        const goods = this.items.map(item => {
+      render(filterItems) {
+        const goods = this.filterItems.map(item => {
           const goodItem = new GoodsItem(item);
           return goodItem.render()
         }).join('');
@@ -42,23 +68,26 @@ const goods = [
     }
     
     const goodsList = new GoodsList();
-    goodsList.fetchGoods();
-    goodsList.render();
+    goodsList.fetchGoods()
+    
 
 
 
     class bascetList {
-      iteams = [];
-      constructor(goods) {
-          this.goods = goods
-          const goodItems = new GoodsList();
-          goodItems.forEach(item => {
-              if (item.title == goods) {
-                  this.items.push(item)
-              }
-          })
-  
-  
-      }
-  
-  }
+      items = [];
+      fetchGoods(callback = ()=>{}) {
+          service (GET_BASKET_GOODS_ITEMS, (data)=>{
+                  this.items = data;
+                  callback();
+              });
+             }
+        }
+   
+        const bascetList= new bascetList();
+        bascetList.fetchGoods();
+
+        document.getElementsByClassName('search-button')[0].addEventListener('click', () => {
+        const value = document.getElementsByClassName('goods-search')[0].value;
+        goodsList.filterItems(value);
+        goodsList.render();
+        })
