@@ -4,61 +4,53 @@ const goods = [
     { title: 'Jacket', price: 350 },
     { title: 'Shoes', price: 250 },
   ];
-  
-    class GoodsItem {
-      constructor({ title, price }) {
-        this.title = title;
-        this.price = price;
-      }
-      render() {
-        return `
-        <div class="goods-item">
-          <h3>${this.title}</h3>
-          <p>${this.price}</p>
-        </div>
-      `;
-      }
+
+const GET_GOODS_ITEMS = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/catalogData.json'
+const GET_BASKET_GOODS_ITEMS = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/getBasket.json'
+
+    function service(url) {
+      return fetch(url)
+      .then((response) => response.json())
     }
-    class GoodsList {
-      items = [];
-      fetchGoods() {
-        this.items = goods;
-      }
-    
+
+    function init(){
+      const app = new Vue({
+        el: '#root',
+        data: {
+          items: [],
+          filteredItems: [],
+          search: '',
+          isVisibleCart:false,
+          plug:false
+        },
+        methods:{
+        fetchGoods() {
+              service(GET_GOODS_ITEMS).then((data)=>{
+          this.items = data;
+          this.filteredItems = data
+      });
+    },
+    filterItems() {
+        this.filteredItems = this.list.filter (({product_name}) =>{
+          return product_name.match(new RegExp (this.search, 'gui'))
+        }) 
+      },
+    },
+    visibleCart(){
+      this.isVisibleCart == true ? this.isVisibleCart = false : this.isVisibleCart = true;
+    },
+computed:{
       totalPrice() {
-        return this.items.reduce((prev, { price }) => {
+        return this.filteredItems.reduce((prev, { price }) => {
           return prev + price;
         }, 0)
       }
-    
-      render() {
-        const goods = this.items.map(item => {
-          const goodItem = new GoodsItem(item);
-          return goodItem.render()
-        }).join('');
-      
-        document.querySelector('.goods-list').innerHTML = goods;
-      }
+    },
+    mounted() {
+      this.fetchGoods();
     }
-    
-    const goodsList = new GoodsList();
-    goodsList.fetchGoods();
-    goodsList.render();
+  })
+}
+window.onload = init
 
-
-
-    class bascetList {
-      iteams = [];
-      constructor(goods) {
-          this.goods = goods
-          const goodItems = new GoodsList();
-          goodItems.forEach(item => {
-              if (item.title == goods) {
-                  this.items.push(item)
-              }
-          })
-  
-  
-      }
-  
-  }
+      
