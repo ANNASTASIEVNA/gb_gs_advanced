@@ -32,11 +32,11 @@ const GET_BASKET_GOODS_ITEMS = 'https://raw.githubusercontent.com/GeekBrainsTuto
       items = [];
       filteredItems = []
 
-      fetchGoods(callback) {
-        service(GET_GOODS_ITEMS, (data)=>{
+      fetchGoods() {
+        service(GET_GOODS_ITEMS).then((data)=>{
           this.items = data;
           this.filteredItems = data
-          callback()
+          return data;
       });
     }
 
