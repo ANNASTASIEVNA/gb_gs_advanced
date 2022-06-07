@@ -13,81 +13,44 @@ const GET_BASKET_GOODS_ITEMS = 'https://raw.githubusercontent.com/GeekBrainsTuto
       .then((response) => response.json())
     }
 
-    class GoodsItem {
-      constructor({ product_name = "не найдено", price = "укажите цену"}= {}) {
-        this.product_name = product_name;
-        this.price = price;
-      }
-      
-      render() {
-        return `
-        <div class="goods-item">
-          <h3>${this.product_name}</h3>
-          <p>${this.price}</p>
-        </div>
-      `;
-      }
-    }
-    class GoodsList {
-      items = [];
-      filteredItems = []
-
-      fetchGoods(callback) {
-        service(GET_GOODS_ITEMS, (data)=>{
+    function init(){
+      const app = new Vue({
+        el: '#root',
+        data: {
+          items: [],
+          filteredItems: [],
+          search: '',
+          isVisibleCart:false,
+          plug:false
+        },
+        methods:{
+        fetchGoods() {
+              service(GET_GOODS_ITEMS).then((data)=>{
           this.items = data;
           this.filteredItems = data
-          callback()
       });
-    }
-
-    filterItems(value) {
-      return new Promise ((res) =>
-      resolve(
+    },
+    filterItems() {
         this.filteredItems = this.list.filter (({product_name}) =>{
-          return product_name.match(new RegExp ( value, 'gui'))
-        })
-      )
-      )
-      .then(this.render)
-    }
-
+          return product_name.match(new RegExp (this.search, 'gui'))
+        }) 
+      },
+    },
+    visibleCart(){
+      this.isVisibleCart == true ? this.isVisibleCart = false : this.isVisibleCart = true;
+    },
+computed:{
       totalPrice() {
-        return this.items.reduce((prev, { price }) => {
+        return this.filteredItems.reduce((prev, { price }) => {
           return prev + price;
         }, 0)
       }
-    
-      render(filterItems) {
-        const goods = this.filterItems.map(item => {
-          const goodItem = new GoodsItem(item);
-          return goodItem.render()
-        }).join('');
-      
-        document.querySelector('.goods-list').innerHTML = goods;
-      }
+    },
+    mounted() {
+      this.fetchGoods();
     }
-    
-    const goodsList = new GoodsList();
-    goodsList.fetchGoods()
-    
+  })
+}
+window.onload = init
 
-
-
-    class bascetList {
-      items = [];
-      fetchGoods(callback = ()=>{}) {
-          service (GET_BASKET_GOODS_ITEMS, (data)=>{
-                  this.items = data;
-                  callback();
-              });
-             }
-        }
-   
-        const bascetList= new bascetList();
-        bascetList.fetchGoods();
-
-        document.getElementsByClassName('search-button')[0].addEventListener('click', () => {
-        const value = document.getElementsByClassName('goods-search')[0].value;
-        goodsList.filterItems(value);
-        goodsList.render();
-        })
+      
