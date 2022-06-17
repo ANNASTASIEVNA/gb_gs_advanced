@@ -15,25 +15,20 @@
    <div id="root">
       <header>
       <h1 class="title">e-Shop</h1>
-      <div class="search">
-         <input type="text" class="goods-search" v-model="search"/>
+      <form action="#" class="search-form" @submit.prevent="filter">
+         <searchform v-model="userSearch" id="search-template"></searchform>
          <button class="search-button" type="button" v-on:click="filterItems">Искать</button>
-      </div>
+      </form>
          <button class="cart-button" v-on: click="visibleCart"type="button">Корзина</button>
       
   </header>
    <main>
+      <custom-error class="mainError" :isvisibleerror="isVisibleError"></custom-error>
+      <div v-if="plug" class="plug">Нет данных</div>
       <div class="goods-list">
-         <div class="goods-item" v-for="item in filteredItems">
-            <h3>{{ item.product_name }}</h3>
-               <p>{{ item.price }}</p>
-         </div>
-         <div v-if="isVisibleCart" class="basket-list">
-            <div v-for="item in filteredItems" class="basket-item">
-                <h3 class="goods-title">{{ item.product_name }}</h3>
-                <p class="goods-price">{{ item.price }}</p>
+         <goods-item v-for="item in filteredItems" :item="item"></goods-item>
             </div>
-      </div>
+            <basket-goods :isVisibleCart="isVisibleCart" v-on:closeсart="visibleCart"></basket-goods>
    </main>
 </div>
 </body>

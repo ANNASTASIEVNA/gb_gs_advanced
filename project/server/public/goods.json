@@ -1,0 +1,22 @@
+[
+    {
+        "id": "1",
+        "product_name": "Футболка",
+        "price": 1300
+    },
+    {
+        "id": "2",
+        "product_name": "Брюки",
+        "price": 3700
+    },
+    {
+        "id": "3",
+        "product_name": "Шорты",
+        "price": 1500
+    },
+    {
+        "id": "4",
+        "product_name": "Пиджак",
+        "price": 5000
+    }
+]
