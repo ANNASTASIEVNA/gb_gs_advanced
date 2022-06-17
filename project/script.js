@@ -1,64 +1,110 @@
-const goods = [
-    { title: 'Shirt', price: 150 },
-    { title: 'Socks', price: 50 },
-    { title: 'Jacket', price: 350 },
-    { title: 'Shoes', price: 250 },
-  ];
-  
-    class GoodsItem {
-      constructor({ title, price }) {
-        this.title = title;
-        this.price = price;
-      }
-      render() {
-        return `
-        <div class="goods-item">
-          <h3>${this.title}</h3>
-          <p>${this.price}</p>
-        </div>
-      `;
-      }
+
+const BASE_URL = 'http://localhost:8000';
+const GET_GOODS_ITEMS = `${BASE_URL}goods.json`
+const GET_BASKET_GOODS_ITEMS = `${BASE_URL}basket`
+
+    function service(url) {
+      return fetch(url)
+      .then((response) => response.json())
     }
-    class GoodsList {
-      items = [];
-      fetchGoods() {
-        this.items = goods;
-      }
+
+    function servicePost(url, body){
+      return fetch(url, {
+        method: 'POST',
+        headers:{
+          "Content-type": "application/json"
+        },
+        body: JSON.stringify(body)
+      })
+    }
     
+    const basketGoods = Vue.component('basket-goods', {
+      data() {
+        return {
+          basketGoodsItems: []
+        }
+      },
+  
+      template: `
+        <div class="fixed-area">
+           <div class="basket-card">
+              <div class="basket-card__header">
+                 <h1 class="basket-card__header__title">basket card</h1>
+                 <div class="basket-card__header__delete-icon"
+                    v-on:click="$emit('closeclick')"
+                 ></div>
+              </div>
+              <div class="basket-card__content">
+                 content
+              </div>
+           </div>
+        </div>
+      `,
+      mounted() {
+  
+      }
+    })
+
+    const goodsItem = Vue.component('goods-item', {
+      props:[
+        'item'
+      ],
+      template: `
+      <div class="goods-item">
+        <h3 class="goods-title">{{ item.product_name }}</h3>
+        <p class="goods-price">{{ item.price }}</p>
+      </div>`
+    })
+    const customSearch = Vue.component('custom-search', {
+      template: 
+      `
+      <div>
+        <slot></slot>
+      </div>
+      `
+    })
+
+    function init(){
+      const app = new Vue({
+        el: '#root',
+        data: {
+          items: [],
+          filteredItems: [],
+          search: '',
+          isVisibleCart:false,
+          plug:false,
+          isVisibleError:false,
+        },
+        methods:{
+        fetchGoods() {
+              service(GET_GOODS_ITEMS).then((data)=>{
+          this.items = data;
+          this.filteredItems = data
+      }).catch((data) => {
+        console.log(data)
+        this.isVisibleError = true;
+      })
+    },
+    filterItems() {
+        this.filteredItems = this.list.filter (({product_name}) =>{
+          this.plug = false;
+          return product_name.match(new RegExp (this.search, 'gui'))
+        }) 
+      },
+    },
+    visibleCart(){
+      this.isVisibleCart == true ? this.isVisibleCart = false : this.isVisibleCart = true;
+    },
+computed:{
       totalPrice() {
-        return this.items.reduce((prev, { price }) => {
+        return this.filteredItems.reduce((prev, { price }) => {
           return prev + price;
         }, 0)
       }
-    
-      render() {
-        const goods = this.items.map(item => {
-          const goodItem = new GoodsItem(item);
-          return goodItem.render()
-        }).join('');
-      
-        document.querySelector('.goods-list').innerHTML = goods;
-      }
+    },
+    mounted() {
+      this.fetchGoods();
     }
-    
-    const goodsList = new GoodsList();
-    goodsList.fetchGoods();
-    goodsList.render();
-
-
-
-    class bascetList {
-      iteams = [];
-      constructor(goods) {
-          this.goods = goods
-          const goodItems = new GoodsList();
-          goodItems.forEach(item => {
-              if (item.title == goods) {
-                  this.items.push(item)
-              }
-          })
-  
-  
-      }
-  
-  }
+  });
+}
+window.onload = init
