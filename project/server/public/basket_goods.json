@@ -1,0 +1,42 @@
+[
+    {
+        "id": "1",
+        "count": 6,
+        "data": {
+            "id": "1",
+            "product_name": "Футболка",
+            "price": 200
+        },
+        "total": 100
+    },
+    {
+        "id": "2",
+        "count": 3,
+        "data": {
+            "id": "2",
+            "product_name": "Брюки",
+            "price": 750
+        },
+        "total": 100
+    },
+    {
+        "id": "3",
+        "count": 1,
+        "data": {
+            "id": "3",
+            "product_name": "Шорты",
+            "price": 1000
+        },
+        "total": 100
+    },
+    {
+        "id": "4",
+        "count": 2,
+        "data": {
+            "id": "2",
+            "product_name": "Пиджак",
+            "price": 750
+        },
+        "total": 100
+    }
+]
