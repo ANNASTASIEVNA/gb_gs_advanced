@@ -1,31 +1,65 @@
 
 const BASE_URL = 'http://localhost:8000';
+const GOODS = `${BASE_URL}goods`
 const GET_GOODS_ITEMS = `${BASE_URL}goods.json`
 const GET_BASKET_GOODS_ITEMS = `${BASE_URL}basket`
+const REMOVE_GOOD_URL = "http://localhost:8000/basket";
 
     function service(url) {
       return fetch(url)
       .then((response) => response.json())
     }
 
-    function servicePost(url, body){
-      return fetch(url, {
-        method: 'POST',
-        headers:{
-          "Content-type": "application/json"
-        },
-        body: JSON.stringify(body)
-      })
-    }
-    
-    const basketGoods = Vue.component('basket-goods', {
-      data() {
-        return {
-          basketGoodsItems: []
+    function serviceWithBody(url='',method="POST", body={}) {
+      return fetch(
+        url,
+        {
+          method,
+          headers:{
+            'Content-type':'aplication/json; charset=UTF-8',
+          },
+          body: JSON.stringify(body)
         }
-      },
-  
-      template: `
+        ).then((response) => response.json())
+    }
+
+
+function init(){
+  const basketGoodsItems= Vue.component('basket-item',{
+    props:[
+      'iteam'
+    ],
+  })
+}
+    template: 
+    <div class="basket-item">
+      <div class="basket-item_field">
+        <span class="basket-item__title">{{ item.data.product_name }}</span>
+        <span class="basket-item__price">( {{ item.data.price }}р. )</span>
+      </div>
+       <div class="basket-item__count">
+         <span>{{ item.count }}шт.</span>
+         <button  v-on:click="$emit('add',item.id)">+</button>
+         <button  v-on:click="$emit('delete',item.id)">-</button>
+       </div>
+       <div class="basket-item__total">Всего: {{ item.total }}р.</div>
+    </div>
+
+  const CustomButton=Vue.component('custom-button', {
+    template: 
+        <button class="search-button custom-button" type="button" v-on:click="$emit('click')">
+           <slot></slot>
+        </button>
+      
+  })
+  const bascetGoods= Vue.component('basket-goods', {
+    data() {
+      return {
+        basketGoodsItems: []
+      }
+    },
+    
+    template: 
         <div class="fixed-area">
            <div class="basket-card">
               <div class="basket-card__header">
@@ -35,34 +69,64 @@ const GET_BASKET_GOODS_ITEMS = `${BASE_URL}basket`
                  ></div>
               </div>
               <div class="basket-card__content">
-                 content
+                 <basket-item
+                  v-for="item in basketGoodsItems" 
+                  :item="item"
+                  @add="addGood"
+                  @del="delGood"
+                  ></basket-item>
               </div>
            </div>
         </div>
-      `,
-      mounted() {
-  
-      }
-    })
+    
+     
 
-    const goodsItem = Vue.component('goods-item', {
-      props:[
-        'item'
-      ],
-      template: `
-      <div class="goods-item">
-        <h3 class="goods-title">{{ item.product_name }}</h3>
-        <p class="goods-price">{{ item.price }}</p>
-      </div>`
-    })
-    const customSearch = Vue.component('custom-search', {
-      template: 
-      `
-      <div>
-        <slot></slot>
-      </div>
-      `
-    })
+    mounted() {
+      service(GET_BASKET_GOODS_ITEMS).then((data) => {
+        this.basketGoodsItems = data
+      })
+    },
+
+    methods:{
+      addGood(id){
+        serviceWithBody( GET_BASKET_GOODS_ITEMS, "POST",{
+          id
+        }).then((data) => {
+          this.basketGoodsItems=data
+        })
+      },
+
+
+  const goodsItem = Vue.component('goods-item', {
+    props: [
+      'item'
+    ],
+    template: 
+        <div class="goods-item">
+           <h3>{{ product_name }}</h3>
+           <p>{{ price }}</p>
+           <custom-button  v-on:click="addGood', item.id">добавить</custom-button>
+        </div>
+      
+
+  methods: {
+    addGood() {
+      serviceWithBody(GOODS, "POST",{
+        id: this.item.id
+      })
+    }
+  }
+}),
+  deleteGood() {
+
+  serviceWithBody('DELETE', REMOVE_GOOD_URL,{
+    id
+}) then.((data)=>{
+  this.basketGoodsItems=data
+})
+  }
+}
+  }),
 
     function init(){
       const app = new Vue({
@@ -94,7 +158,8 @@ const GET_BASKET_GOODS_ITEMS = `${BASE_URL}basket`
     },
     visibleCart(){
       this.isVisibleCart == true ? this.isVisibleCart = false : this.isVisibleCart = true;
-    },
+    }
+
 computed:{
       totalPrice() {
         return this.filteredItems.reduce((prev, { price }) => {
@@ -105,6 +170,6 @@ computed:{
     mounted() {
       this.fetchGoods();
     }
-  });
+  })
 }
 window.onload = init

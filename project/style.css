@@ -28,8 +28,18 @@ body {
 .goods-item {
     border: 1px solid rgb(207, 207, 207);
     padding: 10px;
-}
+    width: 200px;
+    height: 300px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: min-content auto min-content;
+    gap: 10px;
 
+}
+.goods-item *{
+    display: flex;
+    justify-content: center;
+}
 .goods-list {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
